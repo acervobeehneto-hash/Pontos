@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placar de Pontos</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: 'Outfit', sans-serif; background: linear-gradient(180deg, #1A1036, #0F0A20); color: #fff; min-height: 100vh; padding: 16px; }
+    .wrap { max-width: 680px; margin: 0 auto; }
+    .banner { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(139,92,246,0.2); background: rgba(139,92,246,0.08); }
+    .banner button { background: #8B5CF6; color: #fff; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-family: 'Outfit'; font-weight: 600; font-size: 13px; }
+    .banner button:hover { background: #A78BFA; }
+    h1 { font-size: 36px; font-weight: 800; margin: 20px 0; }
+    .stats { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat { flex: 1; min-width: 100px; background: #241838; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 12px; }
+    .stat-l { font-size: 11px; text-transform: uppercase; color: #999; margin-bottom: 6px; }
+    .stat-v { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 24px; }
+    .stat.lead .stat-v { color: #FFD43B; }
+    .add { display: flex; gap: 10px; flex-wrap: wrap; background: #241838; border: 1px solid rgba(139,92,246,0.2); border-radius: 12px; padding: 12px; margin-bottom: 20px; }
+    input { background: #0F0A20; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; color: #fff; font-family: 'Outfit'; font-size: 14px; outline: none; }
+    input:focus { border-color: #8B5CF6; box-shadow: 0 0 0 2px rgba(139,92,246,0.2); }
+    .in-name { flex: 1; min-width: 140px; }
+    .in-pts { width: 70px; text-align: center; font-family: 'JetBrains Mono'; }
+    .btn { padding: 10px 14px; font-family: 'Outfit'; cursor: pointer; border-radius: 8px; border: none; font-weight: 600; font-size: 14px; }
+    .btn-add { background: linear-gradient(180deg, #A78BFA, #8B5CF6); color: #fff; }
+    .btn-add:hover { filter: brightness(1.1); }
+    .list { display: flex; flex-direction: column; gap: 10px; }
+    .card { background: #241838; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; }
+    .card.gold { border-color: rgba(255,212,59,0.5); background: linear-gradient(180deg, rgba(255,212,59,0.1), transparent), #241838; }
+    .card.silver { border-color: rgba(214,219,227,0.3); }
+    .card.bronze { border-color: rgba(208,139,91,0.3); }
+    .card-top { display: flex; align-items: center; gap: 10px; }
+    .rank { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #382A55; color: #999; font-family: 'JetBrains Mono'; font-weight: 700; font-size: 14px; }
+    .rank.gold { background: rgba(255,212,59,0.2); color: #FFD43B; }
+    .rank.silver { background: rgba(214,219,227,0.15); color: #D6DBE3; }
+    .rank.bronze { background: rgba(208,139,91,0.15); color: #D08B5B; }
+    .name { flex: 1; font-size: 16px; font-weight: 600; }
+    .score { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 28px; min-width: 50px; text-align: right; }
+    .score.gold { color: #FFD43B; }
+    .score.silver { color: #D6DBE3; }
+    .score.bronze { color: #D08B5B; }
+    .del { background: none; border: none; color: #999; cursor: pointer; font-size: 16px; }
+    .del:hover { color: #F0816A; }
+    .card-bot { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .step { width: 44px; height: 44px; border-radius: 8px; background: #382A55; color: #fff; font-size: 18px; cursor: pointer; border: none; }
+    .step:hover { background: #2E2046; }
+    .controls { margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .chip { background: #382A55; border: 1px solid rgba(255,255,255,0.1); color: #999; border-radius: 8px; padding: 6px 12px; font-family: 'JetBrains Mono'; cursor: pointer; font-weight: 500; }
+    .chip.on { background: rgba(139,92,246,0.2); border-color: #8B5CF6; color: #A78BFA; }
+    .share { margin-top: 24px; padding: 12px; background: rgba(139,92,246,0.1); border-left: 3px solid #8B5CF6; border-radius: 8px; font-size: 13px; }
+    .empty { text-align: center; padding: 40px 20px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; color: #999; }
+    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2E2046; border: 1px solid rgba(139,92,246,0.3); border-radius: 16px; padding: 24px; max-width: 320px; width: 90%; z-index: 1001; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; }
+    .modal h2 { margin: 0 0 12px; font-size: 20px; }
+    .modal input { width: 100%; margin-bottom: 10px; }
+    .modal .btn { width: 100%; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+
+  <script>
+    // Data storage
+    const data = {
+      users: [],
+      step: 1,
+      pin: '20091621'
+    };
+
+    const ui = {
+      unlocked: false,
+      showLogin: false,
+      showSettings: false,
+      loginInput: '',
+      loginError: false,
+      newName: '',
+      newPoints: '',
+      editingId: null,
+      editingValue: '',
+      renamingId: null,
+      renameValue: '',
+      confirmDelete: null,
+      confirmReset: false
+    };
+
+    function save() {
+      try {
+        localStorage.setItem('placar', JSON.stringify(data));
+      } catch (e) {
+        console.warn('LocalStorage indisponível', e);
+      }
+    }
+
+    function load() {
+      try {
+        const saved = localStorage.getItem('placar');
+        if (saved) Object.assign(data, JSON.parse(saved));
+      } catch (e) {
+        console.warn('Erro ao carregar', e);
+      }
+    }
+
+    // Funções
+    function addUser() {
+      const name = ui.newName.trim();
+      if (!name) return;
+      data.users.push({ id: Date.now() + Math.random(), name, points: parseInt(ui.newPoints) || 0 });
+      ui.newName = '';
+      ui.newPoints = '';
+      save();
+      render();
+    }
+
+    function changePoints(id, delta) {
+      const u = data.users.find(u => u.id === id);
+      if (u) {
+        u.points += delta;
+        save();
+        render();
+      }
+    }
+
+    function startScore(id, pts) {
+      ui.editingId = id;
+      ui.editingValue = String(pts);
+      render();
+    }
+
+    function commitScore(id) {
+      const u = data.users.find(u => u.id === id);
+      if (u) u.points = parseInt(ui.editingValue) || 0;
+      ui.editingId = null;
+      save();
+      render();
+    }
+
+    function startRename(id) {
+      ui.renamingId = id;
+      ui.renameValue = data.users.find(u => u.id === id).name;
+      render();
+    }
+
+    function commitRename(id) {
+      const u = data.users.find(u => u.id === id);
+      if (u) u.name = ui.renameValue.trim() || u.name;
+      ui.renamingId = null;
+      save();
+      render();
+    }
+
+    function removeUser(id) {
+      data.users = data.users.filter(u => u.id !== id);
+      ui.confirmDelete = null;
+      save();
+      render();
+    }
+
+    function resetAll() {
+      data.users = [];
+      ui.confirmReset = false;
+      save();
+      render();
+    }
+
+    function tryLogin() {
+      const pwd = document.getElementById('loginPwd')?.value || '';
+      if (pwd === data.pin) {
+        ui.unlocked = true;
+        ui.showLogin = false;
+        ui.loginError = false;
+      } else {
+        ui.loginError = true;
+      }
+      render();
+    }
+
+    function saveNewPin() {
+      const p1 = document.getElementById('newPin1')?.value || '';
+      const p2 = document.getElementById('newPin2')?.value || '';
+      if (!p1 || p1 !== p2) {
+        alert('Senhas não coincidem');
+        return;
+      }
+      data.pin = p1;
+      ui.showSettings = false;
+      save();
+      render();
+    }
+
+    // Render
+    function render() {
+      const ranked = [...data.users].sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+      const rankMap = {};
+      ranked.forEach((u, i) => rankMap[u.id] = i + 1);
+      const total = data.users.reduce((a, u) => a + u.points, 0);
+      const leader = ranked[0]?.points > 0 ? ranked[0] : null;
+
+      const medal = (u) => {
+        if (u.points === 0) return '';
+        const r = rankMap[u.id];
+        return r === 1 ? 'gold' : r === 2 ? 'silver' : r === 3 ? 'bronze' : '';
+      };
+
+      let html = `
+        <div class="banner">
+          <div>
+            <strong>${ui.unlocked ? '🔓 Modo ADM' : '👁 Somente leitura'}</strong>
+          </div>
+          <button class="btn" onclick="window.ui.unlocked ? (window.ui.unlocked = false) : (window.ui.showLogin = true); window.render()">${ui.unlocked ? '🔒 Sair' : '🔓 Entrar'}</button>
+        </div>
+        
+        <h1>🏆 Placar de Pontos</h1>
+        
+        <div class="stats">
+          <div class="stat"><div class="stat-l">👥 Participantes</div><div class="stat-v">${data.users.length}</div></div>
+          <div class="stat"><div class="stat-l">⭐ Total</div><div class="stat-v">${total}</div></div>
+          <div class="stat lead"><div class="stat-l">👑 Líder</div><div class="stat-v">${leader ? leader.name : '—'}</div></div>
+        </div>
+      `;
+
+      if (ui.unlocked) {
+        html += `
+          <div class="add">
+            <input class="in-name" placeholder="Nome" value="${ui.newName}" onchange="window.ui.newName = this.value" onkeydown="if(event.key==='Enter') window.addUser()">
+            <input class="in-pts" type="number" placeholder="0" value="${ui.newPoints}" onchange="window.ui.newPoints = this.value" onkeydown="if(event.key==='Enter') window.addUser()">
+            <button class="btn btn-add" onclick="window.addUser()">➕ Adicionar</button>
+          </div>
+        `;
+      }
+
+      html += '<div class="list">';
+
+      if (ranked.length === 0) {
+        html += `
+          <div class="empty">
+            <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
+            <strong>Nenhum participante</strong>
+            <p style="margin-top: 6px; font-size: 12px;">${ui.unlocked ? 'Adicione acima' : 'Entre como ADM'}</p>
+          </div>
+        `;
+      } else {
+        ranked.forEach((u) => {
+          const m = medal(u);
+          html += `
+            <div class="card ${m}">
+              <div class="card-top">
+                <div class="rank ${m}">${m === 'gold' ? '🥇' : m === 'silver' ? '🥈' : m === 'bronze' ? '🥉' : rankMap[u.id]}</div>
+                <div class="name">
+                  ${ui.renamingId === u.id && ui.unlocked ? 
+                    `<input value="${ui.renameValue}" onchange="window.ui.renameValue = this.value" onblur="window.commitRename(${u.id})" onkeydown="if(event.key==='Enter') window.commitRename(${u.id})" autofocus>` 
+                    : `<span onclick="${ui.unlocked ? `window.startRename(${u.id})` : 'void(0)'}" style="cursor: ${ui.unlocked ? 'pointer' : 'default'}">${u.name}</span>`
+                  }
+                </div>
+                ${!ui.unlocked ? `<span class="score ${m}">${u.points}</span>` : ''}
+                ${ui.unlocked ? (ui.confirmDelete === u.id ? 
+                  `<button class="del" onclick="window.removeUser(${u.id})">✅</button>` 
+                  : `<button class="del" onclick="window.ui.confirmDelete = ${u.id}; window.render()">❌</button>`
+                ) : ''}
+              </div>
+              ${ui.unlocked ? `
+                <div class="card-bot">
+                  <button class="step" onclick="window.changePoints(${u.id}, -${data.step})">−</button>
+                  ${ui.editingId === u.id ? 
+                    `<input class="in-pts" type="number" value="${ui.editingValue}" onchange="window.ui.editingValue = this.value" onblur="window.commitScore(${u.id})" onkeydown="if(event.key==='Enter') window.commitScore(${u.id})" autofocus>` 
+                    : `<span class="score ${m}" onclick="window.startScore(${u.id}, ${u.points})" style="cursor: pointer">${u.points}</span>`
+                  }
+                  <button class="step" onclick="window.changePoints(${u.id}, ${data.step})">+</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+      }
+
+      html += '</div>';
+
+      if (ui.unlocked) {
+        html += `
+          <div class="controls">
+            <div>
+              <span style="font-size: 11px; color: #999; text-transform: uppercase; margin-right: 8px;">Incremento:</span>
+              ${[1, 5, 10].map(s => `<button class="chip ${data.step === s ? 'on' : ''}" onclick="window.data.step = ${s}; window.save(); window.render()">${s}</button>`).join('')}
+            </div>
+            <button class="btn" style="background: #382A55;" onclick="window.ui.showSettings = true; window.render()">🔑 Mudar senha</button>
+            ${ui.confirmReset ? 
+              `<button class="btn" style="background: #F0816A;" onclick="window.resetAll()">✅ Confirmar</button>` 
+              : `<button class="btn" style="background: #382A55;" onclick="window.ui.confirmReset = true; window.render()" ${data.users.length === 0 ? 'disabled' : ''}>🔄 Limpar</button>`
+            }
+          </div>
+        `;
+      }
+
+      html += `<div class="share"><strong>🔗 Compartilhe o link.</strong> Todos veem. Só ADM edita.</div>`;
+
+      document.getElementById('app').innerHTML = html;
+
+      if (ui.showLogin) {
+        document.getElementById('app').innerHTML += `
+          <div class="modal-overlay" onclick="window.ui.showLogin = false; window.render()"></div>
+          <div class="modal">
+            <h2>🔐 Entrar como ADM</h2>
+            <input type="password" id="loginPwd" placeholder="Senha" onkeydown="if(event.key==='Enter') window.tryLogin()">
+            ${ui.loginError ? '<p style="color: #F0816A; font-size: 12px;">Senha incorreta</p>' : ''}
+            <button class="btn btn-add" onclick="window.tryLogin()">🔓 Entrar</button>
+            <button class="btn" style="width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #999;" onclick="window.ui.showLogin = false; window.render()">Cancelar</button>
+          </div>
+        `;
+        setTimeout(() => document.getElementById('loginPwd')?.focus(), 100);
+      }
+
+      if (ui.showSettings) {
+        document.getElementById('app').innerHTML += `
+          <div class="modal-overlay" onclick="window.ui.showSettings = false; window.render()"></div>
+          <div class="modal">
+            <h2>🔑 Mudar senha</h2>
+            <input type="password" id="newPin1" placeholder="Nova senha">
+            <input type="password" id="newPin2" placeholder="Confirmar" onkeydown="if(event.key==='Enter') window.saveNewPin()">
+            <button class="btn btn-add" onclick="window.saveNewPin()">💾 Salvar</button>
+            <button class="btn" style="width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #999;" onclick="window.ui.showSettings = false; window.render()">Cancelar</button>
+          </div>
+        `;
+        setTimeout(() => document.getElementById('newPin1')?.focus(), 100);
+      }
+    }
+
+    // Global window access
+    window.addUser = addUser;
+    window.changePoints = changePoints;
+    window.startScore = startScore;
+    window.commitScore = commitScore;
+    window.startRename = startRename;
+    window.commitRename = commitRename;
+    window.removeUser = removeUser;
+    window.resetAll = resetAll;
+    window.tryLogin = tryLogin;
+    window.saveNewPin = saveNewPin;
+    window.render = render;
+    window.save = save;
+    window.data = data;
+    window.ui = ui;
+
+    // Iniciar
+    load();
+    render();
+  </script>
+</body>
+</html>
